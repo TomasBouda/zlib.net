@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Adler32.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Deflate.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="InfBlocks.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="InfCodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Inflate.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="InfTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="StaticTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="SupportClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Tree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ZInputStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Zlib.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ZOutputStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ZStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ZStreamException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

@@ -41,36 +41,35 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
 * and contributors of zlib.
 */
-using System;
-namespace ComponentAce.Compression.Libs.zlib
+namespace ComponentAce.Compression.Libs.Zlib
 {
-	
+
 	sealed class Inflate
 	{
-		
+
 		private const int MAX_WBITS = 15; // 32K LZ77 window
-		
+
 		// preset dictionary flag in zlib header
 		private const int PRESET_DICT = 0x20;
-		
+
 		internal const int Z_NO_FLUSH = 0;
 		internal const int Z_PARTIAL_FLUSH = 1;
 		internal const int Z_SYNC_FLUSH = 2;
 		internal const int Z_FULL_FLUSH = 3;
 		internal const int Z_FINISH = 4;
-		
+
 		private const int Z_DEFLATED = 8;
-		
+
 		private const int Z_OK = 0;
 		private const int Z_STREAM_END = 1;
 		private const int Z_NEED_DICT = 2;
-		private const int Z_ERRNO = - 1;
-		private const int Z_STREAM_ERROR = - 2;
-		private const int Z_DATA_ERROR = - 3;
-		private const int Z_MEM_ERROR = - 4;
-		private const int Z_BUF_ERROR = - 5;
-		private const int Z_VERSION_ERROR = - 6;
-		
+		private const int Z_ERRNO = -1;
+		private const int Z_STREAM_ERROR = -2;
+		private const int Z_DATA_ERROR = -3;
+		private const int Z_MEM_ERROR = -4;
+		private const int Z_BUF_ERROR = -5;
+		private const int Z_VERSION_ERROR = -6;
+
 		private const int METHOD = 0; // waiting for method byte
 		private const int FLAG = 1; // waiting for flag byte
 		private const int DICT4 = 2; // four dictionary check bytes to go
@@ -85,37 +84,37 @@ namespace ComponentAce.Compression.Libs.zlib
 		private const int CHECK1 = 11; // one check byte to go
 		private const int DONE = 12; // finished check, done
 		private const int BAD = 13; // got an error--stay here
-		
+
 		internal int mode; // current inflate mode
-		
+
 		// mode dependent information
 		internal int method; // if FLAGS, method byte
-		
+
 		// if CHECK, check values to compare
 		internal long[] was = new long[1]; // computed check value
 		internal long need; // stream check value
-		
+
 		// if BAD, inflateSync's marker bytes count
 		internal int marker;
-		
+
 		// mode independent information
 		internal int nowrap; // flag for no wrapper
 		internal int wbits; // log2(window size)  (8..15, defaults to 15)
-		
+
 		internal InfBlocks blocks; // current inflate_blocks state
-		
+
 		internal int inflateReset(ZStream z)
 		{
 			if (z == null || z.istate == null)
 				return Z_STREAM_ERROR;
-			
+
 			z.total_in = z.total_out = 0;
 			z.msg = null;
-			z.istate.mode = z.istate.nowrap != 0?BLOCKS:METHOD;
+			z.istate.mode = z.istate.nowrap != 0 ? BLOCKS : METHOD;
 			z.istate.blocks.reset(z, null);
 			return Z_OK;
 		}
-		
+
 		internal int inflateEnd(ZStream z)
 		{
 			if (blocks != null)
@@ -124,20 +123,20 @@ namespace ComponentAce.Compression.Libs.zlib
 			//    ZFREE(z, z->state);
 			return Z_OK;
 		}
-		
+
 		internal int inflateInit(ZStream z, int w)
 		{
 			z.msg = null;
 			blocks = null;
-			
+
 			// handle undocumented nowrap option (no zlib header or check)
 			nowrap = 0;
 			if (w < 0)
 			{
-				w = - w;
+				w = -w;
 				nowrap = 1;
 			}
-			
+
 			// set window size
 			if (w < 8 || w > 15)
 			{
@@ -145,34 +144,34 @@ namespace ComponentAce.Compression.Libs.zlib
 				return Z_STREAM_ERROR;
 			}
 			wbits = w;
-			
-			z.istate.blocks = new InfBlocks(z, z.istate.nowrap != 0?null:this, 1 << w);
-			
+
+			z.istate.blocks = new InfBlocks(z, z.istate.nowrap != 0 ? null : this, 1 << w);
+
 			// reset state
 			inflateReset(z);
 			return Z_OK;
 		}
-		
+
 		internal int inflate(ZStream z, int f)
 		{
 			int r;
 			int b;
-			
+
 			if (z == null || z.istate == null || z.next_in == null)
 				return Z_STREAM_ERROR;
-			f = f == Z_FINISH?Z_BUF_ERROR:Z_OK;
+			f = f == Z_FINISH ? Z_BUF_ERROR : Z_OK;
 			r = Z_BUF_ERROR;
 			while (true)
 			{
 				//System.out.println("mode: "+z.istate.mode);
 				switch (z.istate.mode)
 				{
-					
-					case METHOD: 
-						
+
+					case METHOD:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						if (((z.istate.method = z.next_in[z.next_in_index++]) & 0xf) != Z_DEFLATED)
 						{
@@ -190,15 +189,15 @@ namespace ComponentAce.Compression.Libs.zlib
 						}
 						z.istate.mode = FLAG;
 						goto case FLAG;
-					
-					case FLAG: 
-						
+
+					case FLAG:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						b = (z.next_in[z.next_in_index++]) & 0xff;
-						
+
 						if ((((z.istate.method << 8) + b) % 31) != 0)
 						{
 							z.istate.mode = BAD;
@@ -206,7 +205,7 @@ namespace ComponentAce.Compression.Libs.zlib
 							z.istate.marker = 5; // can't try inflateSync
 							break;
 						}
-						
+
 						if ((b & PRESET_DICT) == 0)
 						{
 							z.istate.mode = BLOCKS;
@@ -214,56 +213,56 @@ namespace ComponentAce.Compression.Libs.zlib
 						}
 						z.istate.mode = DICT4;
 						goto case DICT4;
-					
-					case DICT4: 
-						
+
+					case DICT4:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
-						z.istate.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & unchecked((int) 0xff000000L);
+						z.istate.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & unchecked((int)0xff000000L);
 						z.istate.mode = DICT3;
 						goto case DICT3;
-					
-					case DICT3: 
-						
+
+					case DICT3:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (((z.next_in[z.next_in_index++] & 0xff) << 16) & 0xff0000L);
 						z.istate.mode = DICT2;
 						goto case DICT2;
-					
-					case DICT2: 
-						
+
+					case DICT2:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (((z.next_in[z.next_in_index++] & 0xff) << 8) & 0xff00L);
 						z.istate.mode = DICT1;
 						goto case DICT1;
-					
-					case DICT1: 
-						
+
+					case DICT1:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (z.next_in[z.next_in_index++] & 0xffL);
 						z.adler = z.istate.need;
 						z.istate.mode = DICT0;
 						return Z_NEED_DICT;
-					
-					case DICT0: 
+
+					case DICT0:
 						z.istate.mode = BAD;
 						z.msg = "need dictionary";
 						z.istate.marker = 0; // can try inflateSync
 						return Z_STREAM_ERROR;
-					
-					case BLOCKS: 
-						
+
+					case BLOCKS:
+
 						r = z.istate.blocks.proc(z, r);
 						if (r == Z_DATA_ERROR)
 						{
@@ -288,84 +287,84 @@ namespace ComponentAce.Compression.Libs.zlib
 						}
 						z.istate.mode = CHECK4;
 						goto case CHECK4;
-					
-					case CHECK4: 
-						
+
+					case CHECK4:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
-						z.istate.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & unchecked((int) 0xff000000L);
+						z.istate.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & unchecked((int)0xff000000L);
 						z.istate.mode = CHECK3;
 						goto case CHECK3;
-					
-					case CHECK3: 
-						
+
+					case CHECK3:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (((z.next_in[z.next_in_index++] & 0xff) << 16) & 0xff0000L);
 						z.istate.mode = CHECK2;
 						goto case CHECK2;
-					
-					case CHECK2: 
-						
+
+					case CHECK2:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (((z.next_in[z.next_in_index++] & 0xff) << 8) & 0xff00L);
 						z.istate.mode = CHECK1;
 						goto case CHECK1;
-					
-					case CHECK1: 
-						
+
+					case CHECK1:
+
 						if (z.avail_in == 0)
 							return r; r = f;
-						
+
 						z.avail_in--; z.total_in++;
 						z.istate.need += (z.next_in[z.next_in_index++] & 0xffL);
-						
-						if (((int) (z.istate.was[0])) != ((int) (z.istate.need)))
+
+						if (((int)(z.istate.was[0])) != ((int)(z.istate.need)))
 						{
 							z.istate.mode = BAD;
 							z.msg = "incorrect data check";
 							z.istate.marker = 5; // can't try inflateSync
 							break;
 						}
-						
+
 						z.istate.mode = DONE;
 						goto case DONE;
-					
-					case DONE: 
+
+					case DONE:
 						return Z_STREAM_END;
-					
-					case BAD: 
+
+					case BAD:
 						return Z_DATA_ERROR;
-					
-					default: 
+
+					default:
 						return Z_STREAM_ERROR;
-					
+
 				}
 			}
 		}
-		
-		
+
+
 		internal int inflateSetDictionary(ZStream z, byte[] dictionary, int dictLength)
 		{
 			int index = 0;
 			int length = dictLength;
 			if (z == null || z.istate == null || z.istate.mode != DICT0)
 				return Z_STREAM_ERROR;
-			
+
 			if (z._adler.adler32(1L, dictionary, 0, dictLength) != z.adler)
 			{
 				return Z_DATA_ERROR;
 			}
-			
+
 			z.adler = z._adler.adler32(0, null, 0, 0);
-			
+
 			if (length >= (1 << z.istate.wbits))
 			{
 				length = (1 << z.istate.wbits) - 1;
@@ -375,16 +374,16 @@ namespace ComponentAce.Compression.Libs.zlib
 			z.istate.mode = BLOCKS;
 			return Z_OK;
 		}
-		
-		private static byte[] mark = new byte[]{(byte) 0, (byte) 0, (byte) SupportClass.Identity(0xff), (byte) SupportClass.Identity(0xff)};
-		
+
+		private static byte[] mark = new byte[] { (byte)0, (byte)0, (byte)SupportClass.Identity(0xff), (byte)SupportClass.Identity(0xff) };
+
 		internal int inflateSync(ZStream z)
 		{
 			int n; // number of bytes to look at
 			int p; // pointer to bytes
 			int m; // number of marker bytes found in a row
 			long r, w; // temporaries to save total_in and total_out
-			
+
 			// set up
 			if (z == null || z.istate == null)
 				return Z_STREAM_ERROR;
@@ -397,7 +396,7 @@ namespace ComponentAce.Compression.Libs.zlib
 				return Z_BUF_ERROR;
 			p = z.next_in_index;
 			m = z.istate.marker;
-			
+
 			// search
 			while (n != 0 && m < 4)
 			{
@@ -415,13 +414,13 @@ namespace ComponentAce.Compression.Libs.zlib
 				}
 				p++; n--;
 			}
-			
+
 			// restore
 			z.total_in += p - z.next_in_index;
 			z.next_in_index = p;
 			z.avail_in = n;
 			z.istate.marker = m;
-			
+
 			// return no joy or set up to restart on a new block
 			if (m != 4)
 			{
@@ -433,7 +432,7 @@ namespace ComponentAce.Compression.Libs.zlib
 			z.istate.mode = BLOCKS;
 			return Z_OK;
 		}
-		
+
 		// Returns true if inflate is currently at the end of a block generated
 		// by Z_SYNC_FLUSH or Z_FULL_FLUSH. This function is used by one PPP
 		// implementation to provide an additional safety check. PPP uses Z_SYNC_FLUSH

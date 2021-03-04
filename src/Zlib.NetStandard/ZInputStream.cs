@@ -41,136 +41,115 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
 * and contributors of zlib.
 */
-using System;
-namespace ComponentAce.Compression.Libs.zlib
+namespace ComponentAce.Compression.Libs.Zlib
 {
-	
-	public class ZInputStream:System.IO.BinaryReader
+
+	public class ZInputStream : System.IO.BinaryReader
 	{
-		internal void  InitBlock()
+		internal void InitBlock()
 		{
-			flush = zlibConst.Z_NO_FLUSH;
-			buf = new byte[bufsize];
+			Flush = ZlibConst.Z_NO_FLUSH;
+			Buf = new byte[Bufsize];
 		}
-		virtual public int FlushMode
+		public virtual int FlushMode
 		{
-			get
-			{
-				return (flush);
-			}
-			
-			set
-			{
-				this.flush = value;
-			}
-			
+			get => (Flush);
+
+			set => Flush = value;
 		}
 		/// <summary> Returns the total number of bytes input so far.</summary>
-		virtual public long TotalIn
-		{
-			get
-			{
-				return z.total_in;
-			}
-			
-		}
+		public virtual long TotalIn => Z.total_in;
+
 		/// <summary> Returns the total number of bytes output so far.</summary>
-		virtual public long TotalOut
-		{
-			get
-			{
-				return z.total_out;
-			}
-			
-		}
-		
-		protected ZStream z = new ZStream();
-		protected int bufsize = 512;		
-		protected int flush;		
-		protected byte[] buf, buf1 = new byte[1];
-		protected bool compress;
-		
-		internal System.IO.Stream in_Renamed = null;
-		
-		public ZInputStream(System.IO.Stream in_Renamed):base(in_Renamed)
+		public virtual long TotalOut => Z.total_out;
+
+		protected ZStream Z = new ZStream();
+		protected int Bufsize = 512;
+		protected int Flush;
+		protected byte[] Buf, Buf1 = new byte[1];
+		protected bool Compress;
+
+		internal System.IO.Stream In_Renamed = null;
+
+		public ZInputStream(System.IO.Stream inRenamed) : base(inRenamed)
 		{
 			InitBlock();
-			this.in_Renamed = in_Renamed;
-			z.inflateInit();
-			compress = false;
-			z.next_in = buf;
-			z.next_in_index = 0;
-			z.avail_in = 0;
+			this.In_Renamed = inRenamed;
+			Z.inflateInit();
+			Compress = false;
+			Z.next_in = Buf;
+			Z.next_in_index = 0;
+			Z.avail_in = 0;
 		}
-		
-		public ZInputStream(System.IO.Stream in_Renamed, int level):base(in_Renamed)
+
+		public ZInputStream(System.IO.Stream inRenamed, int level) : base(inRenamed)
 		{
 			InitBlock();
-			this.in_Renamed = in_Renamed;
-			z.deflateInit(level);
-			compress = true;
-			z.next_in = buf;
-			z.next_in_index = 0;
-			z.avail_in = 0;
+			this.In_Renamed = inRenamed;
+			Z.deflateInit(level);
+			Compress = true;
+			Z.next_in = Buf;
+			Z.next_in_index = 0;
+			Z.avail_in = 0;
 		}
-		
+
 		/*public int available() throws IOException {
 		return inf.finished() ? 0 : 1;
 		}*/
-		
-		public  override int Read()
+
+		public override int Read()
 		{
-			if (read(buf1, 0, 1) == - 1)
-				return (- 1);
-			return (buf1[0] & 0xFF);
+			if (read(Buf1, 0, 1) == -1)
+				return (-1);
+			return (Buf1[0] & 0xFF);
 		}
-		
-		internal bool nomoreinput = false;
-				
+
+		internal bool Nomoreinput = false;
+
 		public int read(byte[] b, int off, int len)
 		{
 			if (len == 0)
 				return (0);
 			int err;
-			z.next_out = b;
-			z.next_out_index = off;
-			z.avail_out = len;
-			do 
+			Z.next_out = b;
+			Z.next_out_index = off;
+			Z.avail_out = len;
+			do
 			{
-				if ((z.avail_in == 0) && (!nomoreinput))
+				if ((Z.avail_in == 0) && (!Nomoreinput))
 				{
 					// if buffer is empty and more input is avaiable, refill it
-					z.next_in_index = 0;
-					z.avail_in = SupportClass.ReadInput(in_Renamed, buf, 0, bufsize); //(bufsize<z.avail_out ? bufsize : z.avail_out));
-					if (z.avail_in == - 1)
+					Z.next_in_index = 0;
+					Z.avail_in = SupportClass.ReadInput(In_Renamed, Buf, 0, Bufsize); //(bufsize<z.avail_out ? bufsize : z.avail_out));
+					if (Z.avail_in == -1)
 					{
-						z.avail_in = 0;
-						nomoreinput = true;
+						Z.avail_in = 0;
+						Nomoreinput = true;
 					}
 				}
-				if (compress)
-					err = z.deflate(flush);
+				if (Compress)
+					err = Z.deflate(Flush);
 				else
-					err = z.inflate(flush);
-				if (nomoreinput && (err == zlibConst.Z_BUF_ERROR))
-					return (- 1);
-				if (err != zlibConst.Z_OK && err != zlibConst.Z_STREAM_END)
-					throw new ZStreamException((compress?"de":"in") + "flating: " + z.msg);
-				if (nomoreinput && (z.avail_out == len))
-					return (- 1);
+					err = Z.inflate(Flush);
+				if (Nomoreinput && (err == ZlibConst.Z_BUF_ERROR))
+					return (-1);
+				if (err != ZlibConst.Z_OK && err != ZlibConst.Z_STREAM_END)
+					throw new ZStreamException((Compress ? "de" : "in") + "flating: " + Z.msg);
+				if (Nomoreinput && (Z.avail_out == len))
+					return (-1);
 			}
-			while (z.avail_out == len && err == zlibConst.Z_OK);
+			while (Z.avail_out == len && err == ZlibConst.Z_OK);
 			//System.err.print("("+(len-z.avail_out)+")");
-			return (len - z.avail_out);
+			return (len - Z.avail_out);
 		}
-				
-		public long skip(long n)
+
+		public long Skip(long n)
 		{
 			int len = 512;
 			if (n < len)
-				len = (int) n;
+				len = (int)n;
 			byte[] tmp = new byte[len];
-			return ((long) SupportClass.ReadInput(BaseStream, tmp, 0, tmp.Length));
+			return ((long)SupportClass.ReadInput(BaseStream, tmp, 0, tmp.Length));
 		}
 
 		protected override void Dispose(bool disposing)
@@ -179,7 +158,7 @@ namespace ComponentAce.Compression.Libs.zlib
 			if (disposing)
 			{
 				//!in_Renamed.Close();
-				in_Renamed.Dispose();
+				In_Renamed.Dispose();
 			}
 		}
 	}

@@ -1,8 +1,4 @@
-
-using System;
-
-
-namespace ComponentAce.Compression.Libs.zlib
+namespace ComponentAce.Compression.Libs.Zlib
 {
 	public class SupportClass
 	{
@@ -55,7 +51,7 @@ namespace ComponentAce.Compression.Libs.zlib
 		/// <returns>The resulting number from the shift operation</returns>
 		public static int URShift(int number, int bits)
 		{
-			if ( number >= 0)
+			if (number >= 0)
 				return number >> bits;
 			else
 				return (number >> bits) + (2 << ~bits);
@@ -80,7 +76,7 @@ namespace ComponentAce.Compression.Libs.zlib
 		/// <returns>The resulting number from the shift operation</returns>
 		public static long URShift(long number, int bits)
 		{
-			if ( number >= 0)
+			if (number >= 0)
 				return number >> bits;
 			else
 				return (number >> bits) + (2L << ~bits);
@@ -111,15 +107,15 @@ namespace ComponentAce.Compression.Libs.zlib
 				return 0;
 
 			byte[] receiver = new byte[target.Length];
-			int bytesRead   = sourceStream.Read(receiver, start, count);
+			int bytesRead = sourceStream.Read(receiver, start, count);
 
 			// Returns -1 if EOF
-			if (bytesRead == 0)	
+			if (bytesRead == 0)
 				return -1;
-                
-			for(int i = start; i < start + bytesRead; i++)
+
+			for (int i = start; i < start + bytesRead; i++)
 				target[i] = (byte)receiver[i];
-                
+
 			return bytesRead;
 		}
 
@@ -140,7 +136,7 @@ namespace ComponentAce.Compression.Libs.zlib
 			// Returns -1 if EOF
 			if (bytesRead == 0) return -1;
 
-			for(int index=start; index<start+bytesRead; index++)
+			for (int index = start; index < start + bytesRead; index++)
 				target[index] = (byte)charArray[index];
 
 			return bytesRead;
@@ -153,7 +149,7 @@ namespace ComponentAce.Compression.Libs.zlib
 		/// <returns>The new array of bytes</returns>
 		public static byte[] ToByteArray(System.String sourceString)
 		{
-			return System.Text.UTF8Encoding.UTF8.GetBytes(sourceString);
+			return System.Text.Encoding.UTF8.GetBytes(sourceString);
 		}
 
 		/// <summary>
@@ -161,9 +157,9 @@ namespace ComponentAce.Compression.Libs.zlib
 		/// </summary>
 		/// <param name="byteArray">The array of bytes to convert</param>
 		/// <returns>The new array of chars</returns>
-		public static char[] ToCharArray(byte[] byteArray) 
+		public static char[] ToCharArray(byte[] byteArray)
 		{
-			return System.Text.UTF8Encoding.UTF8.GetChars(byteArray);
+			return System.Text.Encoding.UTF8.GetChars(byteArray);
 		}
 
 
